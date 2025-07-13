@@ -16,23 +16,18 @@ exports.signup = async (input) => {
     };
   }
 
-  const { email, password, phone_number } = parsed.data;
+  const { email, password } = parsed.data;
 
   const existingUser = await knex('users').where({ email }).first();
   if (existingUser) {
     return { success: false, message: 'Email already exists' };
   }
-    
-  const existingPhone = await knex('users').where({ phone_number }).first();
-  if (existingPhone) {
-    return { success: false, message: 'Phone number already exists' };
-  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const [user] = await knex('users')
-    .insert({ email, password: hashedPassword, phone_number })
-    .returning(['id', 'email', 'phone_number', 'role']);
+    .insert({ email, password: hashedPassword })
+    .returning(['id', 'email', 'role']);
 
   const token = generateToken(user);
 
